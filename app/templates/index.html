@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>問卷報告生成</title>
+  <link rel="stylesheet" href="/assets/style.css">
+</head>
+<body>
+  <div class="page-shell">
+    <header class="page-header">
+      <h1>問卷報告生成</h1>
+      <p>上傳問卷與附件，解析後生成 Word 報告。</p>
+    </header>
+
+    <section class="workflow-strip" aria-label="使用流程">
+      <article>
+        <span>1</span>
+        <strong>上傳</strong>
+        <p>DOCX、XLSX、PDF、圖片。</p>
+      </article>
+      <article>
+        <span>2</span>
+        <strong>解析</strong>
+        <p>整理成可供 LLM 使用的資料。</p>
+      </article>
+      <article>
+        <span>3</span>
+        <strong>輸出</strong>
+        <p>生成 ReportJSON 並套版成 Word。</p>
+      </article>
+    </section>
+
+    <main class="content-grid">
+      <section class="panel form-panel">
+        <div class="panel-header">
+          <span class="section-tag">Input</span>
+          <h2>上傳資料</h2>
+          <p>目前模板請使用 <code>general_v1</code>，會套用問卷報告範本。</p>
+        </div>
+
+        <form id="report-form" class="report-form">
+          <label class="field">
+            <span>Project Name</span>
+            <input
+              type="text"
+              id="project_name"
+              name="project_name"
+              placeholder="例如：114年度問卷報告"
+              required
+            >
+          </label>
+
+          <label class="field">
+            <span>Hospital Name</span>
+            <input
+              type="text"
+              id="hospital_name"
+              name="hospital_name"
+              placeholder="例如：衛生福利部OOOO醫院"
+            >
+            <p class="field-hint">
+              建議填寫正式醫院名稱。若留空，系統會從問卷與附件內容中嘗試推斷。
+            </p>
+          </label>
+
+          <label class="field">
+            <span>Template ID</span>
+            <select id="template_id" name="template_id" required>
+              <option value="general_v1" selected>general_v1 - 問卷報告模板</option>
+            </select>
+          </label>
+
+          <label class="field">
+            <span>Files</span>
+            <div class="file-picker" id="file-picker">
+              <strong>拖曳檔案到這裡，或點擊選擇</strong>
+              <p>支援 DOCX、CSV、XLSX、PDF、JPG、PNG，可一次上傳多個檔案。</p>
+              <input
+                type="file"
+                id="files"
+                name="files"
+                multiple
+                accept=".docx,.csv,.xlsx,.pdf,.jpg,.jpeg,.png"
+                required
+              >
+              <p class="field-hint">
+                可一次上傳多個檔案。若你只是想先測試問卷理解，直接上傳 <code>5566.docx</code> 也可以。
+              </p>
+            </div>
+          </label>
+
+          <div class="selected-files" id="selected-files">
+            <p class="empty-files">尚未選擇檔案</p>
+          </div>
+
+          <div class="actions">
+            <div class="action-row">
+              <button type="button" id="validate-button" class="secondary-button">先驗證問卷理解</button>
+              <button type="submit" id="submit-button">生成問卷報告</button>
+            </div>
+            <p class="submit-hint">
+              驗證模式會回傳 <code>understanding_json</code>；報告模式會回傳
+              <code>report_json</code>、輸出檔名與下載連結。
+            </p>
+          </div>
+        </form>
+      </section>
+
+      <section class="panel result-panel">
+        <div class="panel-header">
+          <span class="section-tag">Output</span>
+          <h2>結果輸出</h2>
+          <p>會顯示 normalized preview、問卷理解 JSON，以及報告 JSON / 下載資訊。</p>
+        </div>
+
+        <div class="alert info" id="result-status">尚未開始處理</div>
+
+        <div class="result-meta" id="result-meta" hidden>
+          <div class="meta-card">
+            <span class="meta-label">輸出檔案</span>
+            <code id="output-file">-</code>
+          </div>
+          <div class="meta-card">
+            <span class="meta-label">下載連結</span>
+            <a id="download-link" href="#" target="_blank" rel="noreferrer">尚未產生</a>
+          </div>
+        </div>
+
+        <section class="result-block">
+          <div class="result-block-header">
+            <h3>Normalized Preview</h3>
+            <button type="button" class="ghost-button" data-copy-target="normalized-preview">複製</button>
+          </div>
+          <pre id="normalized-preview">尚未產生</pre>
+        </section>
+
+        <section class="result-block">
+          <div class="result-block-header">
+            <h3>Understanding JSON</h3>
+            <button type="button" class="ghost-button" data-copy-target="understanding-json">複製</button>
+          </div>
+          <pre id="understanding-json">尚未產生</pre>
+        </section>
+
+        <section class="result-block">
+          <div class="result-block-header">
+            <h3>Report JSON</h3>
+            <button type="button" class="ghost-button" data-copy-target="report-json">複製</button>
+          </div>
+          <pre id="report-json">尚未產生</pre>
+        </section>
+      </section>
+    </main>
+  </div>
+
+  <script src="/assets/app.js" defer></script>
+</body>
+</html>
